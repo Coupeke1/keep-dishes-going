@@ -1,0 +1,11 @@
+### Create Payment
+
+POST http://localhost:8081/api/orders/bc1ddd94-817c-47bd-a98a-5b754fe772fa/create-payment
+
+### Confirm Payment By Payment ID
+
+POST http://localhost:8081/api/orders/payments/webhook?payment-id=tr_TA3e3M7PTnFtFqrTR8DGJ
+
+### Confirm Payment By Odered Id
+
+POST http://localhost:8081/api/orders/payments/webhook?order-id=420c6886-587b-4de6-90ef-10a72118bd32

@@ -1,0 +1,54 @@
+### create new order
+
+POST http://localhost:8081/api/orders
+Accept: application/json
+
+
+### Get all orders
+
+GET http://localhost:8081/api/orders
+
+
+### Get all for dish
+
+GET http://localhost:8081/api/orders?dishId=0d1e2f3a-4b5c-6d7e-8f9a-0b1c2d3e4f5a
+
+
+### Add dishes to order
+
+POST http://localhost:8081/api/orders/d52fcb99-a131-4545-bd0f-f5d8a75f956c/dishes
+Content-Type: application/json
+Accept: application/json
+
+{
+  "dishId": "80c5737b-ef38-43d4-aa89-984e271e5512",
+  "restaurantId": "7da3ee46-5396-48a8-a0e4-038f68231207",
+  "quantity": 3
+}
+
+
+### Add dishes to order with notes
+
+POST http://localhost:8081/api/orders/46a446aa-0b07-4171-b113-63146db1e32a/dishes
+Content-Type: application/json
+Accept: application/json
+
+{
+  "dishId": "88d19120-3697-4533-88d2-35b27db21772",
+  "restaurantId": "f9dc9519-350d-4f58-b0d3-aac3d3d74c2f",
+  "quantity": 3,
+  "notes": "Extra kaas"
+}
+
+
+### Place Order
+
+POST http://localhost:8081/api/orders/d5ca7ed9-b226-4540-a64d-9827c0e7d1e1/place
+Accept: application/json
+
+
+### Get all restaurants
+
+GET http://localhost:8081/api/restaurants/
+accept: application/json
+

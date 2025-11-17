@@ -1,0 +1,16 @@
+POST http://localhost:8081/hello/raoul
+Authorization: Basic user password
+
+
+###
+
+POST http://localhost:15672/api/exchanges/%2F/demo-exchange-restaurant/publish
+Authorization: Basic user password
+Content-Type: application/json
+
+{
+  "properties": {},
+  "routing_key": "say.demo.thomas",
+  "payload": "{\"name\":\"Mathias\"}",
+  "payload_encoding": "string"
+}
