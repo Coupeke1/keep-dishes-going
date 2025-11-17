@@ -1,0 +1,104 @@
+### login courier
+
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+###### login courier
+
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = courier &
+password = courier &
+scope = openid
+
+
+> {%
+    client.global.set("courier_token", response.body.access_token)
+%}
+###
+
+POST http://localhost:8082/api/drivers
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Jan Janssens",
+  "email": "jan.janssens@example.com",
+  "phoneNumber": "0477123456",
+  "accountNumber": "BE12345678901234",
+  "address": {
+    "street": "Kerkstraat",
+    "houseNumber": "12",
+    "busNumber": "",
+    "postalCode": "1000",
+    "city": "Brussel",
+    "country": "Belgium"
+  }
+}
+###
+@driverId = b58bbe8f-3f70-4a1e-9f2c-4a391fcd2745
+###
+
+POST http://localhost:8082/api/deliveries
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "pickupAddress": {
+    "street": "Gilseinde",
+    "houseNumber": "19",
+    "busNumber": "",
+    "postalCode": "2070",
+    "city": "Zwijndrecht",
+    "country": "Belgium"
+  },
+  "deliveryAddress": {
+    "street": "Neerstraat",
+    "houseNumber": "162",
+    "busNumber": "",
+    "postalCode": "3000",
+    "city": "Leuven",
+    "country": "Belgium"
+  }
+}
+###
+
+@deliveryId = 9ad81aa0-98e8-4317-bf0d-21d93668acf3
+###
+
+POST http://localhost:8082/api/drivers/{{driverId}}/claim/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+###
+
+POST http://localhost:8082/api/drivers/{{driverId}}/pickup
+Authorization: Bearer {{courier_token}}
+
+###
+
+
+POST http://localhost:8082/api/drivers/{{driverId}}/complete
+Authorization: Bearer {{courier_token}}
+
+###
+
+GET http://localhost:8082/api/drivers/{{driverId}}/completed-deliveries
+Authorization: Bearer {{courier_token}}
+Accept: application/json
+
+###

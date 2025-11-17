@@ -1,0 +1,70 @@
+@driverId = 3aa25996-6f65-40c5-9fa7-81811d43e1a1
+@deliveryId = 6c85efda-3923-40cc-a437-1c71e4cd0d3c
+
+### login owner
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+
+### login courier
+
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = courier &
+password = courier &
+scope = openid
+
+
+> {%
+    client.global.set("courier_token", response.body.access_token)
+%}
+
+
+###
+# GET DELIVERY BY ID
+GET http://localhost:8082/api/deliveries/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+# CLAIM DELIVERY
+###
+POST http://localhost:8082/api/drivers/{{driverId}}/claim/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+###
+
+POST http://localhost:8082/api/drivers/{{driverId}}/pickup
+Authorization: Bearer {{courier_token}}
+
+###
+POST http://localhost:8082/api/drivers/{{driverId}}/complete
+Authorization: Bearer {{courier_token}}
+
+###
+GET http://localhost:8082/api/deliveries/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+###
+
+GET http://localhost:8082/api/drivers/{{driverId}}/completed-deliveries
+Authorization: Bearer {{courier_token}}
+Accept: application/json
+
+### Owner downloadt PDF payout report
+GET http://localhost:8082/api/payouts/report?startDate=2025-11-06&endDate=2025-11-20
+Accept: application/pdf
+Authorization: Bearer {{access_token}}
