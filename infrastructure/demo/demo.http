@@ -1,0 +1,304 @@
+### === 1️⃣ Authenticate as Owner 1 (La Notte Italiana) ===
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+> {%
+    client.global.set("access_token_owner1", response.body.access_token)
+%}
+
+
+
+### === 2️⃣ Authenticate as Owner 2 (De Gouden Friet) ===
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner2 &
+password = owner2 &
+scope = openid
+
+> {%
+    client.global.set("access_token_owner2", response.body.access_token)
+%}
+
+
+
+### === 3️⃣ Create restaurant (Owner 1 – La Notte Italiana, open enkel ’s nachts) ===
+POST http://localhost:8080/api/restaurants
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner1}}
+
+{
+  "name": "La Notte Italiana",
+  "address": {
+    "street": "Via Roma",
+    "houseNumber": "7",
+    "busNumber": "",
+    "postalCode": "1000",
+    "city": "Brussel",
+    "country": "Belgium"
+  },
+  "phoneNumber": "+3211223344",
+  "email": "info@lanotteitaliana.be",
+  "openingHours": {
+    "days": [
+      {
+        "day": "MONDAY",
+        "periods": [
+          {
+            "openTime": "18:00:00",
+            "closeTime": "02:00:00"
+          }
+        ]
+      },
+      {
+        "day": "FRIDAY",
+        "periods": [
+          {
+            "openTime": "18:00:00",
+            "closeTime": "03:00:00"
+          }
+        ]
+      },
+      {
+        "day": "SATURDAY",
+        "periods": [
+          {
+            "openTime": "18:00:00",
+            "closeTime": "03:00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "cuisineType": "Italian"
+}
+
+> {%
+    client.global.set("restaurantId_owner1", response.body.id)
+%}
+
+
+
+### === 4️⃣ Create restaurant (Owner 2 – De Gouden Friet, open op vrijdag) ===
+POST http://localhost:8080/api/restaurants
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner2}}
+
+{
+  "name": "De Gouden Friet",
+  "address": {
+    "street": "Kloosterstraat",
+    "houseNumber": "89",
+    "busNumber": "",
+    "postalCode": "2000",
+    "city": "Antwerpen",
+    "country": "Belgium"
+  },
+  "phoneNumber": "+32476444555",
+  "email": "contact@degoudenfriet.be",
+  "openingHours": {
+    "days": [
+      {
+        "day": "FRIDAY",
+        "periods": [
+          {
+            "openTime": "00:00:00",
+            "closeTime": "23:59:59"
+          }
+        ]
+      },
+      {
+        "day": "SATURDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "23:00:00"
+          }
+        ]
+      },
+      {
+        "day": "SUNDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "22:00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "cuisineType": "Belgian"
+}
+
+> {%
+    client.global.set("restaurantId_owner2", response.body.id)
+%}
+
+
+
+### === 5️⃣ Add dishes for La Notte Italiana (owner 1) ===
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner1}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner1}}
+
+{
+  "name": "Pizza Margherita",
+  "description": "Klassieke pizza met tomatensaus, mozzarella en verse basilicum.",
+  "price": 10.50,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE"
+}
+
+###
+
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner1}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner1}}
+
+{
+  "name": "Spaghetti Carbonara",
+  "description": "Authentieke Romeinse carbonara met guanciale, ei en pecorino.",
+  "price": 13.20,
+  "vegetarian": false,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE"
+}
+
+###
+
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner1}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner1}}
+
+{
+  "name": "Tiramisu Classico",
+  "description": "Italiaans dessert met mascarpone, koffie en cacao.",
+  "price": 6.50,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "DESSERT",
+  "status": "CONCEPT"
+}
+
+
+
+### === 6️⃣ Add dishes for De Gouden Friet (owner 2) ===
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner2}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner2}}
+
+{
+  "name": "Friet Speciaal",
+  "description": "Verse Belgische frieten met mayonaise, ketchup en gebakken uitjes.",
+  "price": 4.50,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": true,
+  "category": "DESSERT",
+  "status": "AVAILABLE"
+}
+
+###
+
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner2}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner2}}
+
+{
+  "name": "Stoofvlees met friet",
+  "description": "Rundsstoofvlees in bruin bier met krokante frieten en mayonaise.",
+  "price": 14.90,
+  "vegetarian": false,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE"
+}
+
+###
+
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner2}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner2}}
+
+{
+  "name": "Bicky Burger Deluxe",
+  "description": "Krokante rundsburger met Bicky-saus, augurken en geroosterde ui.",
+  "price": 7.50,
+  "vegetarian": false,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "CONCEPT"
+}
+
+### Update a dish (scheduled for future)
+PUT http://localhost:8080/api/restaurants/{{restaurantId_owner1}}/dishes/e507458e-2a4b-4e5b-917d-bff0a80a89cc
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner1}}
+
+{
+  "name": "Tiramisu Classico",
+  "description": "Italiaans dessert met mascarpone, koffie en cacao.",
+  "price": 6.50,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "DESSERT",
+  "status": "CONCEPT",
+  "scheduledFor": "2025-11-10T15:43:30"
+}
+
+
+
+### === 7️⃣ Verify both restaurants exist (public) ===
+GET http://localhost:8080/api/restaurants
+
+
+### === 8️⃣ Get dishes only for the open restaurant (De Gouden Friet) ===
+GET http://localhost:8080/api/restaurants/{{restaurantId_owner2}}/dishes
+Authorization: Bearer {{access_token_owner2}}
+
+
+
+### === 9️⃣ Owner overview (only for open restaurant) ===
+GET http://localhost:8080/api/owners/overview
+Authorization: Bearer {{access_token_owner1}}
+
+
+### ===  Publish concept dishes ===
+POST http://localhost:8080/api/restaurants/{{restaurantId_owner1}}/dishes/publish
+Authorization: Bearer {{access_token_owner1}}
+
+
+### === 5️⃣ Update dish ===
+PUT http://localhost:8080/api/restaurants/{{restaurantId_owner2}}/dishes/a31f4960-2e35-435b-ae43-0a38668a59de
+Content-Type: application/json
+Authorization: Bearer {{access_token_owner2}}
+
+{
+  "name": "Pizza Margherita Premium",
+  "description": "Premium pizza with buffalo mozzarella",
+  "price": 12.99,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "CONCEPT"
+}
