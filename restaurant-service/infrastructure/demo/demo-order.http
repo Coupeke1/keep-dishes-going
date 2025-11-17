@@ -1,0 +1,37 @@
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner2 &
+password = owner2 &
+scope = openid
+
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+###
+
+@orderId = 907f020d-8b96-4664-a7f3-11d520dda40c
+@restaurantId = 8b53a090-7099-444c-99b8-0189d5122607
+
+###
+GET http://localhost:8080/api/restaurants/{{restaurantId}}/orders
+Authorization: Bearer {{access_token}}
+
+###
+POST http://localhost:8080/api/restaurants/{{restaurantId}}/orders/{{orderId}}/decision
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "decision": "ACCEPTED",
+  "reason": "geen problemen mee"
+}
+
+###
+POST http://localhost:8080/api/restaurants/{{restaurantId}}/orders/{{orderId}}/ready
+Authorization: Bearer {{access_token}}

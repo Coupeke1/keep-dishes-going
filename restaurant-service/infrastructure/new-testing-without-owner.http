@@ -1,0 +1,156 @@
+### === 1️⃣ Authenticate with Keycloak ===
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+
+
+### === 2️⃣ Get all restaurants (public) ===
+GET http://localhost:8080/api/restaurants
+
+
+
+### === 3️⃣ Create restaurant as logged-in owner ===
+POST http://localhost:8080/api/restaurants
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Testend Restaurant",
+  "address": {
+    "street": "Teststraat",
+    "houseNumber": "123",
+    "busNumber": "A",
+    "postalCode": "1000",
+    "city": "Brussel",
+    "country": "Belgium"
+  },
+  "phoneNumber": "+3212345678",
+  "email": "test@restaurant.be",
+  "openingHours": {
+    "days": [
+      {
+        "day": "MONDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "14:00:00"
+          },
+          {
+            "openTime": "18:00:00",
+            "closeTime": "22:00:00"
+          }
+        ]
+      },
+      {
+        "day": "TUESDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "14:00:00"
+          },
+          {
+            "openTime": "18:00:00",
+            "closeTime": "22:00:00"
+          }
+        ]
+      },
+      {
+        "day": "SUNDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "17:00:00"
+          },
+          {
+            "openTime": "18:00:00",
+            "closeTime": "22:00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "cuisineType": "Italian"
+}
+
+> {%
+    client.global.set("restaurantId", response.body.id)
+%}
+
+
+
+### === 4️⃣ Add a dish ===
+POST http://localhost:8080/api/restaurants/{{restaurantId}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Pizza bolognese",
+  "description": "Classic Italian pizza with tomato sauce and mozzarella",
+  "price": 9.99,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE"
+}
+
+> {%
+    client.global.set("dishId", response.body.id)
+%}
+
+
+
+### === 5️⃣ Update dish ===
+PUT http://localhost:8080/api/restaurants/{{restaurantId}}/dishes/{{dishId}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Pizza Margherita Premium",
+  "description": "Premium pizza with buffalo mozzarella",
+  "price": 12.99,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE"
+}
+
+### add a update pending for the future
+PUT http://localhost:8080/api/restaurants/{{restaurantId}}/dishes/{{dishId}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Pizza Margherita Premium",
+  "description": "Premium pizza without any extra toppings",
+  "price": 19.99,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE",
+  "scheduledFor": "2025-11-02T15:43:30"
+}
+
+
+### === 6️⃣ Publish concept dishes ===
+POST http://localhost:8080/api/restaurants/{{restaurantId}}/dishes/publish
+Authorization: Bearer {{access_token}}
+
+
+
+### === 7️⃣ Owner overview (JWT-based) ===
+GET http://localhost:8080/api/owners/overview
+Authorization: Bearer {{access_token}}

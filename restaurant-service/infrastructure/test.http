@@ -1,0 +1,323 @@
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+### Create a new owner
+POST http://localhost:8080/api/owners
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "John Doe",
+  "email": "john.diee@example.com",
+  "phoneNumber": "+32456789123",
+  "address": {
+    "street": "Main Street",
+    "houseNumber": "1",
+    "busNumber": "",
+    "postalCode": "2000",
+    "city": "Antwerp",
+    "country": "Belgium"
+  }
+}
+
+> {%
+    client.global.set("ownerId", response.body.id)
+%}
+
+
+
+### Create a new owner
+POST http://localhost:8080/api/owners
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Sleepy Joe",
+  "email": "sleepy.joe@example.com",
+  "phoneNumber": "+32456789123",
+  "address": {
+    "street": "Main Street",
+    "houseNumber": "1",
+    "busNumber": "",
+    "postalCode": "2000",
+    "city": "Antwerp",
+    "country": "Belgium"
+  }
+}
+
+> {%
+    client.global.set("night_owner_id", response.body.id)
+%}
+
+
+### Get all restaurants
+GET http://localhost:8080/api/restaurants
+
+### Get restaurant by ID
+GET http://localhost:8080/api/restaurants/{{restaurantId}}
+
+### Create a new night-only restaurant
+POST http://localhost:8080/api/restaurants
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Midnight Bites",
+  "address": {
+    "street": "Night Avenue",
+    "houseNumber": "42",
+    "busNumber": "",
+    "postalCode": "2100",
+    "city": "Antwerp",
+    "country": "Belgium"
+  },
+  "phoneNumber": "+32477777777",
+  "email": "midnight@bites.be",
+  "openingHours": {
+    "days": [
+      {
+        "day": "MONDAY",
+        "periods": [
+          {
+            "openTime": "22:00:00",
+            "closeTime": "02:00:00"
+          }
+        ]
+      },
+      {
+        "day": "TUESDAY",
+        "periods": [
+          {
+            "openTime": "22:00:00",
+            "closeTime": "02:00:00"
+          }
+        ]
+      },
+      {
+        "day": "FRIDAY",
+        "periods": [
+          {
+            "openTime": "23:00:00",
+            "closeTime": "04:00:00"
+          }
+        ]
+      },
+      {
+        "day": "SATURDAY",
+        "periods": [
+          {
+            "openTime": "23:00:00",
+            "closeTime": "05:00:00"
+          }
+        ]
+      },
+      {
+        "day": "SUNDAY",
+        "periods": [
+          {
+            "openTime": "22:00:00",
+            "closeTime": "02:00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "cuisineType": "Late-night Snacks",
+  "ownerId": "{{night_owner_id}}"
+}
+
+> {%
+    client.global.set("nightRestaurantId", response.body.id)
+%}
+
+### Create a new restaurant
+POST http://localhost:8080/api/restaurants
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Testend Restaurant",
+  "address": {
+    "street": "Teststraat",
+    "houseNumber": "123",
+    "busNumber": "A",
+    "postalCode": "1000",
+    "city": "Brussel",
+    "country": "Belgium"
+  },
+  "phoneNumber": "+3212345678",
+  "email": "test@restaurant.be",
+  "openingHours": {
+    "days": [
+      {
+        "day": "MONDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "14:00:00"
+          },
+          {
+            "openTime": "18:00:00",
+            "closeTime": "22:00:00"
+          }
+        ]
+      },
+      {
+        "day": "TUESDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "14:00:00"
+          },
+          {
+            "openTime": "18:00:00",
+            "closeTime": "22:00:00"
+          }
+        ]
+      },
+      {
+        "day": "WEDNESDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "18:00:00"
+          },
+          {
+            "openTime": "20:00:00",
+            "closeTime": "23:30:00"
+          }
+        ]
+      },
+      {
+        "day": "THURSDAY",
+        "periods": [
+          {
+            "openTime": "11:00:00",
+            "closeTime": "18:00:00"
+          },
+          {
+            "openTime": "19:00:00",
+            "closeTime": "23:30:00"
+          }
+        ]
+      },
+      {
+        "day": "FRIDAY",
+        "periods": [
+          {
+            "openTime": "09:00:00",
+            "closeTime": "18:00:00"
+          },
+          {
+            "openTime": "19:00:00",
+            "closeTime": "23:30:00"
+          }
+        ]
+      }
+    ]
+  },
+  "cuisineType": "Italian",
+  "ownerId": "{{ownerId}}"
+}
+
+> {%
+    client.global.set("restaurantId", response.body.id)
+%}
+
+
+### Add a dish to a restaurant
+POST http://localhost:8080/api/restaurants/{{restaurantId}}/dishes
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "pizza golden",
+  "description": "Classic Italian pizza with tomato sauce and mozzarella",
+  "price": 5.99,
+  "vegetarian": true,
+  "vegan": true,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "CONCEPT"
+}
+> {%
+    client.global.set("dishId", response.body.id)
+%}
+
+### Update a dish (immediate)
+PUT http://localhost:8080/api/restaurants/{{restaurantId}}/dishes/{{dishId}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Pizza",
+  "description": "Classic Italian pizza with fresh basil",
+  "price": 69.69,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE"
+}
+
+### Update a dish (scheduled for future)
+PUT http://localhost:8080/api/restaurants/{{restaurantId}}/dishes/{{dishId}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Pizza Margherita Premium",
+  "description": "Premium pizza without any extra toppings",
+  "price": 19.99,
+  "vegetarian": true,
+  "vegan": false,
+  "glutenFree": false,
+  "category": "MAIN",
+  "status": "AVAILABLE",
+  "scheduledFor": "2025-11-02T15:43:30"
+}
+
+### Update dish status
+PATCH http://localhost:8080/api/restaurants/d287eb09-9f2b-4416-865e-5115b38ba091/dishes/ff3013a7-8412-42b7-beb3-f3118dc4a345/status?
+    status=SOLD_OUT
+
+### Delete a dish
+DELETE http://localhost:8080/api/restaurants/d287eb09-9f2b-4416-865e-5115b38ba091/dishes/ff3013a7-8412-42b7-beb3-f3118dc4a345
+
+### Publish all concept dishes
+POST http://localhost:8080/api/restaurants/d287eb09-9f2b-4416-865e-5115b38ba091/dishes/publish
+
+### Owner Endpoints
+
+### Get owner by ID
+GET http://localhost:8080/api/owners/{{ownerId}}
+
+
+### Get owner's restaurant ID
+GET http://localhost:8080/api/owners/{{ownerId}}/restaurant
+
+### Get dish from restaurant
+GET http://localhost:8080/api/restaurants/{{restaurantId}}/dishes/{{dishId}}
+
+### Get all dishes from restaurant
+GET http://localhost:8080/api/restaurants/{{restaurantId}}/dishes
+
+### Get all dishes from restaurant including concepts
+GET http://localhost:8080/api/restaurants/{{restaurantId}}/dishes?includeConcepts=true
+
+### Get overview of restaurant
+GET http://localhost:8080/api/owners/{{ownerId}}ew
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
