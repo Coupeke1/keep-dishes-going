@@ -1,0 +1,109 @@
+### Login als owner
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+### Login als courier (Keycloak-driver)
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = courier &
+password = courier &
+scope = openid
+
+> {%
+    client.global.set("courier_token", response.body.access_token)
+%}
+
+### Registreer de courier in backend (wordt gekoppeld aan zijn Keycloak subject)
+POST http://localhost:8082/api/drivers/register
+Content-Type: application/json
+Authorization: Bearer {{courier_token}}
+
+{
+  "name": "Peter Pieterson",
+  "email": "p.pieterson@example.com",
+  "phoneNumber": "0483957822",
+  "accountNumber": "BE12342668901234",
+  "address": {
+    "street": "Neerstraat",
+    "houseNumber": "12",
+    "busNumber": "",
+    "postalCode": "1000",
+    "city": "Brussel",
+    "country": "Belgium"
+  }
+}
+
+### Owner maakt een nieuwe delivery aan
+POST http://localhost:8082/api/deliveries
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "pickupAddress": {
+    "street": "Gilseinde",
+    "houseNumber": "19",
+    "busNumber": "",
+    "postalCode": "2070",
+    "city": "Zwijndrecht",
+    "country": "Belgium"
+  },
+  "deliveryAddress": {
+    "street": "Neerstraat",
+    "houseNumber": "162",
+    "busNumber": "",
+    "postalCode": "3000",
+    "city": "Leuven",
+    "country": "Belgium"
+  }
+}
+
+> {%
+    client.global.set("deliveryId", response.body.id)
+%}
+###
+
+@deliveryId = 907f020d-8b96-4664-a7f3-11d520dda40c
+
+### Haal info over ingelogde driver (JWT subject)
+GET http://localhost:8082/api/drivers/me
+Authorization: Bearer {{courier_token}}
+
+### Haal delivery info op als owner
+GET http://localhost:8082/api/deliveries/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+### Driver claimt een delivery
+POST http://localhost:8082/api/drivers/claim/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+### Driver start de pickup
+POST http://localhost:8082/api/drivers/pickup
+Authorization: Bearer {{courier_token}}
+
+### Driver voltooit de delivery en ontvangt payout
+POST http://localhost:8082/api/drivers/complete
+Authorization: Bearer {{courier_token}}
+
+### Bekijk delivery status als driver
+GET http://localhost:8082/api/deliveries/{{deliveryId}}
+Authorization: Bearer {{courier_token}}
+
+### Owner downloadt PDF payout report
+GET http://localhost:8082/api/payouts/report?startDate=2025-10-01&endDate=2025-10-25
+Accept: application/pdf
+Authorization: Bearer {{access_token}}

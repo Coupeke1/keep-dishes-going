@@ -1,0 +1,109 @@
+# ================================
+# VARIABLES
+# ================================
+@driverId = 7c8f1e4d-13aa-485d-b99a-d062c91c41b3
+@deliveryId = 59dd40b4-eb80-44cc-b870-9435a00aff3c
+
+
+### login owner
+
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = owner &
+password = owner &
+scope = openid
+
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+### login courier
+
+POST http://localhost:8180/realms/keepdishesgoing/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = backend-client &
+client_secret = nxBGESuYD65AQUYcyrN6pm33oEBOkD2P &
+username = courier &
+password = courier &
+scope = openid
+
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+###
+# ================================
+# CREATE A NEW DRIVER
+# ================================
+POST http://localhost:8081/api/drivers
+Content-Type: application/json
+
+{
+  "name": "Jan Janssens",
+  "email": "jan.janssens@example.com",
+  "phoneNumber": "0477123456",
+  "accountNumber": "BE12345678901234",
+  "address": {
+    "street": "Kerkstraat",
+    "houseNumber": "12",
+    "busNumber": "",
+    "postalCode": "1000",
+    "city": "Brussel",
+    "country": "Belgium"
+  }
+}
+###
+# ================================
+# GET DRIVER BY ID
+# ================================
+GET http://localhost:8081/api/drivers/{{driverId}}
+###
+# ================================
+# CREATE A NEW DELIVERY
+# ================================
+POST http://localhost:8081/api/deliveries
+Content-Type: application/json
+
+{
+  "pickupAddress": {
+    "street": "Gilseinde",
+    "houseNumber": "19",
+    "busNumber": "",
+    "postalCode": "2070",
+    "city": "Zwijndrecht",
+    "country": "Belgium"
+  },
+  "deliveryAddress": {
+    "street": "Neerstraat",
+    "houseNumber": "162",
+    "busNumber": "",
+    "postalCode": "3000",
+    "city": "Leuven",
+    "country": "Belgium"
+  }
+}
+###
+# ================================
+# GET DELIVERY BY ID
+# ================================
+GET http://localhost:8081/api/deliveries/{{deliveryId}}
+
+# ================================
+# CLAIM DELIVERY
+# ================================
+###
+POST http://localhost:8081/api/drivers/{{driverId}}/claim/{{deliveryId}}
+
+# ================================
+# COMPLETE DELIVERY
+# ================================
+###
+POST http://localhost:8081/api/drivers/{{driverId}}/complete
+Content-Type: application/json
